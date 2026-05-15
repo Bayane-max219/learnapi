@@ -86,11 +86,16 @@ class Course
     #[ORM\OneToMany(targetEntity: Enrollment::class, mappedBy: 'course', cascade: ['remove'])]
     private Collection $enrollments;
 
+    #[ORM\OneToMany(targetEntity: Quiz::class, mappedBy: 'course', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[Groups(['course:read'])]
+    private Collection $quizzes;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->lessons = new ArrayCollection();
         $this->enrollments = new ArrayCollection();
+        $this->quizzes = new ArrayCollection();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -114,9 +119,16 @@ class Course
     public function getLessons(): Collection { return $this->lessons; }
     public function getEnrollments(): Collection { return $this->enrollments; }
 
+    public function getQuizzes(): Collection { return $this->quizzes; }
+    public function addQuiz(Quiz $quiz): static { if (!$this->quizzes->contains($quiz)) { $this->quizzes->add($quiz); $quiz->setCourse($this); } return $this; }
+    public function removeQuiz(Quiz $quiz): static { if ($this->quizzes->removeElement($quiz)) { if ($quiz->getCourse() === $this) { $quiz->setCourse(null); } } return $this; }
+
     #[Groups(['course:read'])]
     public function getLessonCount(): int { return $this->lessons->count(); }
 
     #[Groups(['course:read'])]
     public function getStudentCount(): int { return $this->enrollments->count(); }
+
+    #[Groups(['course:read'])]
+    public function getQuizCount(): int { return $this->quizzes->count(); }
 }
