@@ -11,6 +11,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use App\Repository\CourseRepository;
+use App\State\CourseStateProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -24,6 +25,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     operations: [new Get(), new GetCollection(), new Post(), new Put(), new Delete()],
     normalizationContext: ['groups' => ['course:read']],
     denormalizationContext: ['groups' => ['course:write']],
+    processor: CourseStateProcessor::class,
 )]
 #[ApiFilter(SearchFilter::class, properties: ['title' => 'partial', 'category' => 'exact', 'level' => 'exact'])]
 class Course

@@ -7,6 +7,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\Repository\EnrollmentRepository;
+use App\State\EnrollmentStateProcessor;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -18,7 +19,8 @@ use Symfony\Component\Validator\Constraints as Assert;
     operations: [new Get(), new GetCollection(), new Post()],
     normalizationContext: ['groups' => ['enrollment:read']],
     denormalizationContext: ['groups' => ['enrollment:write']],
-    security: "is_granted('ROLE_USER')"
+    security: "is_granted('ROLE_USER')",
+    processor: EnrollmentStateProcessor::class,
 )]
 class Enrollment
 {
