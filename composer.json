@@ -28,7 +28,10 @@
         "symfony/serializer": "7.4.*",
         "symfony/validator": "7.4.*",
         "symfony/yaml": "7.4.*",
-        "stripe/stripe-php": "^16.0"
+        "stripe/stripe-php": "^16.0",
+        "symfony/mercure-bundle": "^0.3",
+        "dompdf/dompdf": "^3.0",
+        "endroid/qr-code": "^6.0"
     },
     "config": {
         "allow-plugins": {
