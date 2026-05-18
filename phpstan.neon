@@ -1,0 +1,14 @@
+parameters:
+    level: 8
+    paths:
+        - src
+    excludePaths:
+        - src/Kernel.php
+    symfony:
+        container_xml_path: var/cache/dev/App_KernelDevDebugContainer.xml
+    ignoreErrors:
+        # Doctrine entity nullability — managed by ORM at runtime
+        - '#Call to an undefined method Doctrine\\ORM\\QueryBuilder::#'
+        - '#Cannot call method .+ on null#'
+    checkMissingIterableValueType: false
+    reportUnmatchedIgnoredErrors: false

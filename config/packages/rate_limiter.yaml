@@ -1,0 +1,19 @@
+framework:
+    rate_limiter:
+        # 60 requests per minute per IP for authenticated API endpoints
+        api_authenticated:
+            policy: token_bucket
+            limit: 60
+            rate: { interval: '1 minute', amount: 60 }
+
+        # 10 requests per minute per IP for unauthenticated requests (register, login)
+        api_anonymous:
+            policy: fixed_window
+            limit: 10
+            interval: '1 minute'
+
+        # 5 certificate PDF downloads per hour per user
+        certificate_download:
+            policy: fixed_window
+            limit: 5
+            interval: '1 hour'

@@ -30,6 +30,7 @@
         "symfony/yaml": "7.4.*",
         "stripe/stripe-php": "^16.0",
         "symfony/mercure-bundle": "^0.3",
+        "symfony/rate-limiter": "7.4.*",
         "dompdf/dompdf": "^3.0",
         "endroid/qr-code": "^6.0"
     },
@@ -46,6 +47,10 @@
         "psr-4": {
             "App\\": "src/"
         }
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-symfony": "^2.0"
     },
     "autoload-dev": {
         "psr-4": {
