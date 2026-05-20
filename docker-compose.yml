@@ -1,0 +1,40 @@
+services:
+  app:
+    build: .
+    container_name: learnapi-app
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: prod
+      APP_SECRET: learnapi_secret_bayane2026_prod
+      DATABASE_URL: mysql://learnapi:learnapi@db:3306/learnapi?serverVersion=8.0&charset=utf8mb4
+      JWT_SECRET_KEY: /var/www/learnapi/config/jwt/private.pem
+      JWT_PUBLIC_KEY: /var/www/learnapi/config/jwt/public.pem
+      JWT_PASSPHRASE: db5dee8b15a52584f6f35a9379929756879753a72c60e579c36e70da42b113f0
+      CORS_ALLOW_ORIGIN: "^https?://(localhost|127\\.0\\.0\\.1)(:[0-9]+)?$"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: learnapi-db
+    environment:
+      MYSQL_DATABASE: learnapi
+      MYSQL_USER: learnapi
+      MYSQL_PASSWORD: learnapi
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - learnapi_mysql:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "learnapi", "-plearnapi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  learnapi_mysql:
