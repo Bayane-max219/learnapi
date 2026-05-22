@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ApiResource(
     operations: [new Get(), new GetCollection()],
     normalizationContext: ['groups' => ['certificate:read']],
-    security: "is_granted('ROLE_USER')"
+
 )]
 class Certificate
 {

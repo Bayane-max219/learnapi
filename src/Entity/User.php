@@ -24,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     operations: [new Get(), new GetCollection(), new Patch()],
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']],
-    security: "is_granted('ROLE_USER')"
+
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {

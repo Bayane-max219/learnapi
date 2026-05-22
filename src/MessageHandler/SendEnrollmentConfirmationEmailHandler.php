@@ -4,9 +4,7 @@ namespace App\MessageHandler;
 
 use App\Message\SendEnrollmentConfirmationEmail;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
 final class SendEnrollmentConfirmationEmailHandler
 {
     public function __construct(private readonly LoggerInterface $logger) {}

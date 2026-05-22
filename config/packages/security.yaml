@@ -33,6 +33,7 @@ security:
         - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
         - { path: ^/api/courses, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/certificates/verify, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

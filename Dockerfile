@@ -1,4 +1,4 @@
-FROM php:8.3-cli-alpine AS base
+FROM php:8.4-cli-alpine AS base
 
 RUN apk add --no-cache \
     git \
@@ -15,9 +15,6 @@ RUN apk add --no-cache \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/learnapi
-
-COPY composer.json composer.lock symfony.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
 
 COPY . .
 

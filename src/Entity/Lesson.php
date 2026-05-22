@@ -56,7 +56,7 @@ class Lesson
 
     #[ORM\ManyToOne(targetEntity: Course::class, inversedBy: 'lessons')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    #[Groups(['lesson:read'])]
+    #[Groups(['lesson:read', 'lesson:write'])]
     private ?Course $course = null;
 
     public function getId(): ?int { return $this->id; }

@@ -63,7 +63,7 @@ class CertificatePdfService
         $userName = htmlspecialchars($user->getFirstName() . ' ' . $user->getLastName());
         $courseName = htmlspecialchars($course->getTitle());
         $issuedDate = $certificate->getIssuedAt()->format('F j, Y');
-        $token = htmlspecialchars($certificate->getToken());
+        $token = htmlspecialchars($certificate->getUuid());
 
         return <<<HTML
 <!DOCTYPE html>

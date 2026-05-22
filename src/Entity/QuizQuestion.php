@@ -19,7 +19,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     operations: [new Get(), new GetCollection(), new Post(), new Put(), new Delete()],
     normalizationContext: ['groups' => ['question:read']],
     denormalizationContext: ['groups' => ['question:write']],
-    security: "is_granted('ROLE_INSTRUCTOR')"
+
 )]
 class QuizQuestion
 {
