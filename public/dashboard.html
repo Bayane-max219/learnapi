@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LearnAPI — Dashboard</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+
+  /* Layout */
+  .sidebar{position:fixed;left:0;top:0;width:230px;height:100vh;background:#161b27;border-right:1px solid #2d3748;display:flex;flex-direction:column;z-index:100}
+  .main{margin-left:230px;min-height:100vh}
+  .topbar{background:#161b27;border-bottom:1px solid #2d3748;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+  .content{padding:24px}
+
+  /* Sidebar */
+  .logo{padding:20px 20px 16px;border-bottom:1px solid #2d3748}
+  .logo h1{font-size:18px;font-weight:700;color:#fff}.logo span{color:#8b5cf6}
+  .logo small{display:block;color:#64748b;font-size:11px;margin-top:2px}
+  .nav{padding:12px 0;flex:1;overflow-y:auto}
+  .nav-group{padding:8px 20px 4px;font-size:10px;color:#475569;text-transform:uppercase;letter-spacing:.08em;margin-top:8px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;color:#94a3b8;font-size:13px;transition:all .15s;border-left:3px solid transparent}
+  .nav-item:hover{color:#e2e8f0;background:#1e2535}
+  .nav-item.active{color:#8b5cf6;background:#1e2535;border-left-color:#8b5cf6}
+  .sidebar-footer{padding:16px 20px;border-top:1px solid #2d3748}
+
+  /* Auth banner */
+  .auth-banner{background:#1e2535;border:1px solid #2d3748;border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .auth-info{font-size:12px;color:#94a3b8}
+  .auth-email{color:#8b5cf6;font-weight:600;font-size:12px}
+
+  /* Topbar */
+  .page-title{font-size:18px;font-weight:600}
+  .status-pills{display:flex;gap:10px;align-items:center}
+  .pill{display:flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border-radius:999px;font-weight:500}
+  .pill.ok{background:#052e16;color:#4ade80}.pill.err{background:#450a0a;color:#f87171}
+  .pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+  .pill.ok .pill-dot{animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+  /* Cards */
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+  .card{background:#161b27;border:1px solid #2d3748;border-radius:12px;padding:20px}
+  .card-label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+  .card-value{font-size:28px;font-weight:700;color:#fff}
+  .card-sub{font-size:11px;color:#64748b;margin-top:4px}
+
+  /* Section */
+  .section{background:#161b27;border:1px solid #2d3748;border-radius:12px;margin-bottom:20px;overflow:hidden}
+  .section-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #2d3748}
+  .section-title{font-size:14px;font-weight:600}
+  .section-body{padding:20px}
+
+  /* Grid */
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+
+  /* Table */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:.05em;padding:0 12px 10px;border-bottom:1px solid #2d3748}
+  td{padding:11px 12px;border-bottom:1px solid #1e2535;vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#1a2035}
+  .empty-row td{text-align:center;color:#64748b;padding:28px}
+
+  /* Badges */
+  .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
+  .b-purple{background:#2d1b69;color:#a78bfa}
+  .b-green{background:#052e16;color:#4ade80}
+  .b-blue{background:#1e3a5f;color:#60a5fa}
+  .b-yellow{background:#3d2a00;color:#fbbf24}
+  .b-gray{background:#1e293b;color:#94a3b8}
+  .b-orange{background:#431407;color:#fb923c}
+  .b-red{background:#450a0a;color:#f87171}
+
+  /* Buttons */
+  .btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:7px 14px;border-radius:7px;border:none;cursor:pointer;transition:all .15s;white-space:nowrap}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn-primary{background:#8b5cf6;color:#fff}.btn-primary:hover:not(:disabled){background:#7c3aed}
+  .btn-success{background:#16a34a;color:#fff}.btn-success:hover:not(:disabled){background:#15803d}
+  .btn-danger{background:#dc2626;color:#fff}.btn-danger:hover:not(:disabled){background:#b91c1c}
+  .btn-ghost{background:#1e2535;color:#94a3b8}.btn-ghost:hover:not(:disabled){background:#2d3748;color:#e2e8f0}
+  .btn-outline{background:transparent;border:1px solid #2d3748;color:#94a3b8}.btn-outline:hover:not(:disabled){border-color:#8b5cf6;color:#8b5cf6}
+  .btn-sm{padding:4px 10px;font-size:11px}
+  .btn-full{width:100%;justify-content:center}
+
+  /* Forms */
+  .form-row{display:grid;gap:14px;margin-bottom:14px}
+  .form-row.cols-2{grid-template-columns:1fr 1fr}
+  .form-row.cols-3{grid-template-columns:1fr 1fr 1fr}
+  .form-group{display:flex;flex-direction:column;gap:5px}
+  label{font-size:11px;color:#94a3b8;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+  input,select,textarea{background:#0f1117;border:1px solid #2d3748;border-radius:6px;padding:8px 12px;color:#e2e8f0;font-size:13px;width:100%;transition:border .15s}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#8b5cf6}
+  select option{background:#1e2535}
+  textarea{resize:vertical;min-height:70px}
+  .form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+
+  /* Auth page */
+  .auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f1117}
+  .auth-card{background:#161b27;border:1px solid #2d3748;border-radius:16px;padding:36px;width:420px}
+  .auth-logo{text-align:center;margin-bottom:28px}
+  .auth-logo h1{font-size:24px;font-weight:700}.auth-logo span{color:#8b5cf6}
+  .auth-logo p{color:#64748b;font-size:13px;margin-top:4px}
+  .auth-tabs{display:flex;background:#0f1117;border-radius:8px;padding:4px;margin-bottom:24px}
+  .auth-tab{flex:1;padding:8px;text-align:center;cursor:pointer;border-radius:6px;font-size:13px;font-weight:500;color:#64748b;transition:all .2s}
+  .auth-tab.active{background:#8b5cf6;color:#fff}
+  .error-msg{background:#450a0a;border:1px solid #7f1d1d;border-radius:6px;padding:10px 14px;font-size:12px;color:#f87171;margin-bottom:14px}
+  .success-msg{background:#052e16;border:1px solid #14532d;border-radius:6px;padding:10px 14px;font-size:12px;color:#4ade80;margin-bottom:14px}
+
+  /* Toast */
+  #toasts{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
+  .toast{background:#1e2535;border:1px solid #2d3748;border-radius:8px;padding:10px 14px;font-size:13px;min-width:250px;display:flex;align-items:center;gap:8px;animation:slideIn .2s;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+  .toast.success{border-left:3px solid #4ade80}.toast.error{border-left:3px solid #f87171}.toast.info{border-left:3px solid #8b5cf6}
+  @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+  /* Certificate card */
+  .cert-card{background:#0f1117;border:1px solid #2d3748;border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px}
+  .cert-title{font-weight:600;font-size:14px}
+  .cert-meta{font-size:12px;color:#64748b}
+  .cert-actions{display:flex;gap:8px;margin-top:4px}
+
+  /* Lesson card */
+  .lesson-card{background:#0f1117;border:1px solid #2d3748;border-radius:8px;padding:14px;display:flex;gap:12px;align-items:flex-start}
+  .lesson-num{background:#2d1b69;color:#a78bfa;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+  .lesson-info .lesson-title{font-weight:600;font-size:13px}
+  .lesson-info .lesson-meta{font-size:11px;color:#64748b;margin-top:3px}
+
+  /* Quiz */
+  .quiz-question{background:#0f1117;border:1px solid #2d3748;border-radius:8px;padding:14px;margin-bottom:10px}
+  .quiz-q{font-size:13px;font-weight:500;margin-bottom:8px}
+  .quiz-options{display:flex;flex-wrap:wrap;gap:6px}
+  .quiz-opt{background:#1e2535;border:1px solid #2d3748;border-radius:5px;padding:5px 10px;font-size:11px;color:#94a3b8}
+
+  /* Misc */
+  .text-muted{color:#64748b;font-size:12px}
+  .spinner{width:14px;height:14px;border:2px solid #2d3748;border-top-color:#8b5cf6;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .divider{height:1px;background:#2d3748;margin:16px 0}
+  .verify-result{background:#0f1117;border:1px solid #2d3748;border-radius:8px;padding:16px;margin-top:14px}
+  .tag{font-family:monospace;font-size:11px;background:#1e2535;padding:2px 6px;border-radius:4px;color:#94a3b8}
+</style>
+</head>
+<body>
+
+<!-- AUTH PAGE -->
+<div id="authPage" class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <h1>Learn<span>API</span></h1>
+      <p>Plateforme d'apprentissage en ligne</p>
+    </div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchAuthTab('login')">Connexion</div>
+      <div class="auth-tab" onclick="switchAuthTab('register')">Inscription</div>
+    </div>
+
+    <!-- Login -->
+    <div id="loginForm">
+      <div id="loginError"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Email</label><input id="loginEmail" type="email" placeholder="instructor@learnapi.com" value="instructor@learnapi.com"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Mot de passe</label><input id="loginPassword" type="password" placeholder="••••••••" value="demo1234"/></div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="login()" style="margin-top:8px">Se connecter</button>
+      <div style="margin-top:12px;text-align:center">
+        <span class="text-muted">Comptes de démo :</span><br>
+        <span class="text-muted">instructor@learnapi.com / demo1234</span><br>
+        <span class="text-muted">test@learnapi.com / demo1234</span>
+      </div>
+    </div>
+
+    <!-- Register -->
+    <div id="registerForm" style="display:none">
+      <div id="registerError"></div>
+      <div class="form-row cols-2">
+        <div class="form-group"><label>Prénom</label><input id="regFirstName" type="text" placeholder="Jean"/></div>
+        <div class="form-group"><label>Nom</label><input id="regLastName" type="text" placeholder="Dupont"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Email</label><input id="regEmail" type="email" placeholder="jean@email.com"/></div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-group"><label>Mot de passe</label><input id="regPassword" type="password" placeholder="••••••••"/></div>
+        <div class="form-group"><label>Rôle</label>
+          <select id="regRole">
+            <option value="student">Étudiant</option>
+            <option value="instructor">Instructeur</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="register()" style="margin-top:8px">Créer un compte</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+  <div class="sidebar">
+    <div class="logo">
+      <h1>Learn<span>API</span></h1>
+      <small>Plateforme d'apprentissage</small>
+    </div>
+    <nav class="nav">
+      <div class="nav-group">Général</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">📊 Dashboard</div>
+      <div class="nav-group">Contenu</div>
+      <div class="nav-item" onclick="showPage('courses')">📚 Cours</div>
+      <div class="nav-item" onclick="showPage('lessons')">📖 Leçons</div>
+      <div class="nav-item" onclick="showPage('quizzes')">🧠 Quiz</div>
+      <div class="nav-group">Étudiants</div>
+      <div class="nav-item" onclick="showPage('enrollments')">🎓 Inscriptions</div>
+      <div class="nav-item" onclick="showPage('certificates')">🏆 Certificats</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="auth-banner">
+        <div>
+          <div class="auth-email" id="userEmail">—</div>
+          <div class="auth-info" id="userRole">—</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">⏏</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="page-title" id="pageTitle">Dashboard</span>
+      <div class="status-pills">
+        <div class="pill ok"><div class="pill-dot"></div> API connectée</div>
+        <span class="text-muted" id="lastUpdate"></span>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div id="page-dashboard">
+        <div class="cards" id="dashCards">
+          <div class="card"><div class="card-label">Cours</div><div class="card-value" id="statCourses">—</div><div class="card-sub">publiés + brouillons</div></div>
+          <div class="card"><div class="card-label">Leçons</div><div class="card-value" id="statLessons" style="color:#8b5cf6">—</div><div class="card-sub">total</div></div>
+          <div class="card"><div class="card-label">Inscriptions</div><div class="card-value" id="statEnrollments" style="color:#60a5fa">—</div><div class="card-sub">étudiants inscrits</div></div>
+          <div class="card"><div class="card-label">Certificats</div><div class="card-value" id="statCerts" style="color:#fbbf24">—</div><div class="card-sub">émis</div></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="section">
+            <div class="section-header"><span class="section-title">📚 Cours récents</span></div>
+            <div style="padding:0"><table>
+              <thead><tr><th>Titre</th><th>Niveau</th><th>Étudiants</th><th>Status</th></tr></thead>
+              <tbody id="dashCourses"><tr class="empty-row"><td colspan="4">Chargement…</td></tr></tbody>
+            </table></div>
+          </div>
+          <div class="section">
+            <div class="section-header"><span class="section-title">🎓 Inscriptions récentes</span></div>
+            <div style="padding:0"><table>
+              <thead><tr><th>Cours</th><th>Progression</th><th>Status</th></tr></thead>
+              <tbody id="dashEnrollments"><tr class="empty-row"><td colspan="3">Chargement…</td></tr></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COURSES -->
+      <div id="page-courses" style="display:none">
+        <div class="section">
+          <div class="section-header"><span class="section-title">Créer un cours</span></div>
+          <div class="section-body">
+            <div class="form-row cols-2">
+              <div class="form-group"><label>Titre *</label><input id="cTitle" placeholder="Ex: Python Avancé"/></div>
+              <div class="form-group"><label>Prix (€)</label><input id="cPrice" type="number" value="29.99" step="0.01"/></div>
+            </div>
+            <div class="form-row cols-2">
+              <div class="form-group"><label>Catégorie</label>
+                <select id="cCategory">
+                  <option value="python">Python</option><option value="dotnet">.NET</option>
+                  <option value="javascript">JavaScript</option><option value="php">PHP</option>
+                  <option value="devops">DevOps</option><option value="other">Autre</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Niveau</label>
+                <select id="cLevel"><option value="beginner">Débutant</option><option value="intermediate" selected>Intermédiaire</option><option value="advanced">Avancé</option></select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Description</label><textarea id="cDesc" placeholder="Description du cours…"></textarea></div>
+            </div>
+            <div class="form-actions"><button class="btn btn-primary" onclick="createCourse()">+ Créer le cours</button></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-header"><span class="section-title">Tous les cours</span><button class="btn btn-ghost btn-sm" onclick="loadCourses()">↺</button></div>
+          <div style="padding:0"><table>
+            <thead><tr><th>ID</th><th>Titre</th><th>Catégorie</th><th>Niveau</th><th>Prix</th><th>Leçons</th><th>Étudiants</th><th>Actions</th></tr></thead>
+            <tbody id="coursesTable"><tr class="empty-row"><td colspan="8">Chargement…</td></tr></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- LESSONS -->
+      <div id="page-lessons" style="display:none">
+        <div class="grid-2">
+          <div class="section">
+            <div class="section-header"><span class="section-title">Ajouter une leçon</span></div>
+            <div class="section-body">
+              <div class="form-row">
+                <div class="form-group"><label>Cours *</label><select id="lCourse"><option value="">Sélectionner…</option></select></div>
+              </div>
+              <div class="form-row cols-2">
+                <div class="form-group"><label>Titre *</label><input id="lTitle" placeholder="Introduction"/></div>
+                <div class="form-group"><label>Position</label><input id="lPosition" type="number" value="1" min="1"/></div>
+              </div>
+              <div class="form-row cols-2">
+                <div class="form-group"><label>Durée (min)</label><input id="lDuration" type="number" value="30" min="1"/></div>
+                <div class="form-group"><label>Vidéo URL</label><input id="lVideo" placeholder="https://youtube.com/…"/></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Contenu</label><textarea id="lContent" placeholder="Contenu de la leçon…"></textarea></div>
+              </div>
+              <div class="form-actions"><button class="btn btn-primary" onclick="createLesson()">+ Ajouter la leçon</button></div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-header"><span class="section-title">Leçons</span><button class="btn btn-ghost btn-sm" onclick="loadLessons()">↺</button></div>
+            <div class="section-body" id="lessonsList" style="display:flex;flex-direction:column;gap:10px"><p class="text-muted">Chargement…</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUIZZES -->
+      <div id="page-quizzes" style="display:none">
+        <div class="grid-2">
+          <div>
+            <div class="section">
+              <div class="section-header"><span class="section-title">Créer un quiz</span></div>
+              <div class="section-body">
+                <div class="form-row">
+                  <div class="form-group"><label>Cours *</label><select id="qCourse"><option value="">Sélectionner…</option></select></div>
+                </div>
+                <div class="form-row cols-2">
+                  <div class="form-group"><label>Titre *</label><input id="qTitle" placeholder="Quiz Final"/></div>
+                  <div class="form-group"><label>Score minimum (%)</label><input id="qScore" type="number" value="70" min="0" max="100"/></div>
+                </div>
+                <div class="form-actions"><button class="btn btn-primary" onclick="createQuiz()">+ Créer le quiz</button></div>
+              </div>
+            </div>
+            <div class="section" style="margin-top:0">
+              <div class="section-header"><span class="section-title">Ajouter une question</span></div>
+              <div class="section-body">
+                <div class="form-row">
+                  <div class="form-group"><label>Quiz *</label><select id="qqQuiz"><option value="">Sélectionner…</option></select></div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group"><label>Question *</label><input id="qqText" placeholder="Quelle est la capitale de…"/></div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group"><label>Options (une par ligne) *</label><textarea id="qqOptions" placeholder="Option A&#10;Option B&#10;Option C&#10;Option D" style="min-height:90px"></textarea></div>
+                </div>
+                <div class="form-row cols-2">
+                  <div class="form-group"><label>Bonne réponse</label><input id="qqAnswer" placeholder="Option A"/></div>
+                  <div class="form-group"><label>Points</label><input id="qqPoints" type="number" value="1" min="1"/></div>
+                </div>
+                <div class="form-actions"><button class="btn btn-primary" onclick="createQuestion()">+ Ajouter la question</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-header"><span class="section-title">Quiz existants</span><button class="btn btn-ghost btn-sm" onclick="loadQuizzes()">↺</button></div>
+            <div class="section-body" id="quizzesList"><p class="text-muted">Chargement…</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ENROLLMENTS -->
+      <div id="page-enrollments" style="display:none">
+        <div class="grid-2">
+          <div class="section">
+            <div class="section-header"><span class="section-title">Inscrire à un cours</span></div>
+            <div class="section-body">
+              <div class="form-row">
+                <div class="form-group"><label>Cours *</label><select id="eCourse"><option value="">Sélectionner…</option></select></div>
+              </div>
+              <div class="form-actions"><button class="btn btn-primary" onclick="createEnrollment()">S'inscrire</button></div>
+              <div class="divider"></div>
+              <p class="text-muted" style="margin-bottom:12px">Marquer une inscription comme terminée :</p>
+              <div class="form-row cols-2">
+                <div class="form-group"><label>ID Inscription</label><input id="completeId" type="number" placeholder="1"/></div>
+                <div class="form-group" style="justify-content:flex-end"><button class="btn btn-success" onclick="completeEnrollment()" style="margin-top:18px">✅ Terminer + Certificat</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-header"><span class="section-title">Mes inscriptions</span><button class="btn btn-ghost btn-sm" onclick="loadEnrollments()">↺</button></div>
+            <div style="padding:0"><table>
+              <thead><tr><th>ID</th><th>Cours</th><th>Progression</th><th>Status</th></tr></thead>
+              <tbody id="enrollmentsTable"><tr class="empty-row"><td colspan="4">Chargement…</td></tr></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CERTIFICATES -->
+      <div id="page-certificates" style="display:none">
+        <div class="grid-2">
+          <div>
+            <div class="section">
+              <div class="section-header"><span class="section-title">🏆 Mes certificats</span><button class="btn btn-ghost btn-sm" onclick="loadCertificates()">↺</button></div>
+              <div class="section-body" id="certsList"><p class="text-muted">Chargement…</p></div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-header"><span class="section-title">🔍 Vérifier un certificat</span></div>
+            <div class="section-body">
+              <p class="text-muted" style="margin-bottom:14px">Accès public — entrez l'UUID du certificat pour vérifier son authenticité.</p>
+              <div class="form-row">
+                <div class="form-group"><label>UUID du certificat</label><input id="verifyUuid" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"/></div>
+              </div>
+              <button class="btn btn-primary btn-full" onclick="verifyCert()">🔍 Vérifier l'authenticité</button>
+              <div id="verifyResult"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+const API = 'http://localhost:8000';
+let token = localStorage.getItem('learnapi_token') || '';
+let currentUser = JSON.parse(localStorage.getItem('learnapi_user') || 'null');
+
+// ─── Auth ───
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1)));
+  document.getElementById('loginForm').style.display = tab==='login' ? '' : 'none';
+  document.getElementById('registerForm').style.display = tab==='register' ? '' : 'none';
+}
+
+async function login() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  try {
+    const r = await fetch(`${API}/api/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password}) });
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.message || 'Identifiants invalides');
+    token = d.token;
+    localStorage.setItem('learnapi_token', token);
+    // Decode payload
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    currentUser = { email: payload.username, roles: payload.roles };
+    localStorage.setItem('learnapi_user', JSON.stringify(currentUser));
+    initApp();
+  } catch(e) {
+    document.getElementById('loginError').innerHTML = `<div class="error-msg">❌ ${e.message}</div>`;
+  }
+}
+
+async function register() {
+  const body = {
+    email: document.getElementById('regEmail').value,
+    password: document.getElementById('regPassword').value,
+    firstName: document.getElementById('regFirstName').value,
+    lastName: document.getElementById('regLastName').value,
+    role: document.getElementById('regRole').value,
+  };
+  try {
+    const r = await fetch(`${API}/api/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.detail || JSON.stringify(d));
+    document.getElementById('registerError').innerHTML = `<div class="success-msg">✅ Compte créé ! Connectez-vous maintenant.</div>`;
+    setTimeout(() => switchAuthTab('login'), 1500);
+  } catch(e) {
+    document.getElementById('registerError').innerHTML = `<div class="error-msg">❌ ${e.message}</div>`;
+  }
+}
+
+function logout() {
+  token = ''; currentUser = null;
+  localStorage.removeItem('learnapi_token');
+  localStorage.removeItem('learnapi_user');
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('authPage').style.display = 'flex';
+}
+
+function initApp() {
+  document.getElementById('authPage').style.display = 'none';
+  document.getElementById('app').style.display = '';
+  document.getElementById('userEmail').textContent = currentUser?.email || '—';
+  const roles = currentUser?.roles || [];
+  document.getElementById('userRole').textContent = roles.includes('ROLE_INSTRUCTOR') ? '👨‍🏫 Instructeur' : '🎓 Étudiant';
+  showPage('dashboard');
+}
+
+// ─── API helper ───
+async function api(method, path, body, accept='application/ld+json') {
+  const opts = { method, headers: { 'Authorization': `Bearer ${token}`, 'Accept': accept } };
+  if(body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+  const r = await fetch(API + path, opts);
+  if(r.status === 204) return null;
+  const ct = r.headers.get('content-type') || '';
+  const d = ct.includes('json') ? await r.json() : await r.text();
+  if(!r.ok) throw new Error(d?.detail || d?.['hydra:description'] || JSON.stringify(d).slice(0,100));
+  return d;
+}
+
+// ─── Navigation ───
+function showPage(page) {
+  document.querySelectorAll('[id^="page-"]').forEach(el => el.style.display = 'none');
+  document.getElementById('page-' + page).style.display = '';
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => {
+    if(el.textContent.toLowerCase().includes(
+      page==='dashboard'?'dashboard':page==='courses'?'cours':page==='lessons'?'leçons':
+      page==='quizzes'?'quiz':page==='enrollments'?'inscriptions':'certificats'
+    )) el.classList.add('active');
+  });
+  const titles = {dashboard:'Dashboard',courses:'Cours',lessons:'Leçons',quizzes:'Quiz',enrollments:'Inscriptions',certificates:'Certificats'};
+  document.getElementById('pageTitle').textContent = titles[page];
+  document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('fr-FR');
+  const loaders = {dashboard:loadDashboard,courses:()=>{loadCourses();},lessons:()=>{loadLessons();loadCoursesSelect('lCourse');},quizzes:()=>{loadQuizzes();loadCoursesSelect('qCourse');},enrollments:()=>{loadEnrollments();loadCoursesSelect('eCourse');},certificates:loadCertificates};
+  loaders[page]?.();
+}
+
+// ─── Dashboard ───
+async function loadDashboard() {
+  try {
+    const [courses, lessons, enrollments] = await Promise.all([
+      api('GET','/api/courses'), api('GET','/api/lessons'), api('GET','/api/enrollments')
+    ]);
+    document.getElementById('statCourses').textContent = courses.totalItems ?? 0;
+    document.getElementById('statLessons').textContent = lessons.totalItems ?? 0;
+    document.getElementById('statEnrollments').textContent = enrollments.totalItems ?? 0;
+
+    let certs = 0;
+    try { const c = await api('GET','/api/my-certificates','','application/json'); certs = Array.isArray(c) ? c.length : 0; } catch(e){}
+    document.getElementById('statCerts').textContent = certs;
+
+    // Courses table
+    const courseRows = (courses.member || []).map(c => `
+      <tr>
+        <td><strong>${c.title}</strong></td>
+        <td>${levelBadge(c.level)}</td>
+        <td>${c.studentCount ?? 0}</td>
+        <td>${c.published ? '<span class="badge b-green">Publié</span>' : '<span class="badge b-gray">Brouillon</span>'}</td>
+      </tr>
+    `).join('');
+    document.getElementById('dashCourses').innerHTML = courseRows || '<tr class="empty-row"><td colspan="4">Aucun cours</td></tr>';
+
+    // Enrollments table
+    const enrRows = (enrollments.member || []).map(e => `
+      <tr>
+        <td>${e.course?.title || '#'+e.course?.id}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:60px;height:4px;background:#2d3748;border-radius:2px"><div style="width:${e.progressPercent}%;height:100%;background:${e.progressPercent>=100?'#4ade80':'#8b5cf6'};border-radius:2px"></div></div>
+            <span style="font-size:11px">${e.progressPercent}%</span>
+          </div>
+        </td>
+        <td>${statusBadge(e.status)}</td>
+      </tr>
+    `).join('');
+    document.getElementById('dashEnrollments').innerHTML = enrRows || '<tr class="empty-row"><td colspan="3">Aucune inscription</td></tr>';
+  } catch(e) { toast('error', e.message); }
+}
+
+// ─── Courses ───
+async function loadCourses() {
+  try {
+    const d = await api('GET', '/api/courses');
+    const tbody = document.getElementById('coursesTable');
+    const rows = (d.member || []).map(c => `
+      <tr>
+        <td>#${c.id}</td>
+        <td><strong>${c.title}</strong></td>
+        <td><span class="badge b-blue">${c.category}</span></td>
+        <td>${levelBadge(c.level)}</td>
+        <td>${c.price}€</td>
+        <td>${c.lessonCount ?? 0}</td>
+        <td>${c.studentCount ?? 0}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteCourse(${c.id})">🗑</button></td>
+      </tr>
+    `).join('');
+    tbody.innerHTML = rows || '<tr class="empty-row"><td colspan="8">Aucun cours</td></tr>';
+  } catch(e) { toast('error', e.message); }
+}
+
+async function createCourse() {
+  const title = document.getElementById('cTitle').value.trim();
+  if(!title) return toast('error', 'Titre requis');
+  try {
+    const c = await api('POST', '/api/courses', {
+      title, description: document.getElementById('cDesc').value,
+      category: document.getElementById('cCategory').value,
+      level: document.getElementById('cLevel').value,
+      price: parseFloat(document.getElementById('cPrice').value),
+    });
+    toast('success', `Cours "${c.title}" créé (#${c.id})`);
+    document.getElementById('cTitle').value = ''; document.getElementById('cDesc').value = '';
+    loadCourses();
+  } catch(e) { toast('error', e.message); }
+}
+
+async function deleteCourse(id) {
+  if(!confirm(`Supprimer le cours #${id} ?`)) return;
+  try { await api('DELETE', `/api/courses/${id}`); toast('success', `Cours #${id} supprimé`); loadCourses(); }
+  catch(e) { toast('error', e.message); }
+}
+
+// ─── Lessons ───
+async function loadLessons() {
+  try {
+    const d = await api('GET', '/api/lessons');
+    const el = document.getElementById('lessonsList');
+    if(!d.member?.length) { el.innerHTML = '<p class="text-muted">Aucune leçon</p>'; return; }
+    el.innerHTML = d.member.map(l => `
+      <div class="lesson-card">
+        <div class="lesson-num">${l.position}</div>
+        <div class="lesson-info">
+          <div class="lesson-title">${l.title}</div>
+          <div class="lesson-meta">⏱ ${l.durationMinutes} min · ${l.content?.slice(0,60) || '—'}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {}
+}
+
+async function createLesson() {
+  const title = document.getElementById('lTitle').value.trim();
+  const courseIri = document.getElementById('lCourse').value;
+  if(!title || !courseIri) return toast('error', 'Cours et titre requis');
+  try {
+    const l = await api('POST', '/api/lessons', {
+      title, course: courseIri,
+      content: document.getElementById('lContent').value,
+      durationMinutes: parseInt(document.getElementById('lDuration').value),
+      position: parseInt(document.getElementById('lPosition').value),
+      videoUrl: document.getElementById('lVideo').value || null,
+    });
+    toast('success', `Leçon "${l.title}" ajoutée`);
+    document.getElementById('lTitle').value = ''; document.getElementById('lContent').value = '';
+    loadLessons();
+  } catch(e) { toast('error', e.message); }
+}
+
+// ─── Quizzes ───
+async function loadQuizzes() {
+  try {
+    const d = await api('GET', '/api/quizzes');
+    const qqSel = document.getElementById('qqQuiz');
+    qqSel.innerHTML = '<option value="">Sélectionner…</option>';
+    (d.member || []).forEach(q => { qqSel.innerHTML += `<option value="${q['@id']}">${q.title}</option>`; });
+
+    const el = document.getElementById('quizzesList');
+    if(!d.member?.length) { el.innerHTML = '<p class="text-muted">Aucun quiz</p>'; return; }
+    el.innerHTML = d.member.map(q => `
+      <div style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong>${q.title}</strong>
+          <span class="badge b-blue">${q.questionCount ?? 0} questions · ${q.totalPoints ?? 0} pts</span>
+        </div>
+        ${(q.questions||[]).map(qq => `
+          <div class="quiz-question">
+            <div class="quiz-q">${qq.questionText}</div>
+            <div class="quiz-options">${(qq.options||[]).map(o => `<div class="quiz-opt">${o}</div>`).join('')}</div>
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+  } catch(e) {}
+}
+
+async function createQuiz() {
+  const title = document.getElementById('qTitle').value.trim();
+  const courseIri = document.getElementById('qCourse').value;
+  if(!title || !courseIri) return toast('error', 'Cours et titre requis');
+  try {
+    const q = await api('POST', '/api/quizzes', {
+      title, course: courseIri,
+      passingScore: parseInt(document.getElementById('qScore').value),
+      timeLimit: 0,
+    });
+    toast('success', `Quiz "${q.title}" créé`);
+    document.getElementById('qTitle').value = '';
+    loadQuizzes();
+  } catch(e) { toast('error', e.message); }
+}
+
+async function createQuestion() {
+  const questionText = document.getElementById('qqText').value.trim();
+  const quizIri = document.getElementById('qqQuiz').value;
+  const optionsRaw = document.getElementById('qqOptions').value.trim();
+  if(!questionText || !quizIri || !optionsRaw) return toast('error', 'Quiz, question et options requis');
+  const options = optionsRaw.split('\n').map(o => o.trim()).filter(Boolean);
+  try {
+    await api('POST', '/api/quiz_questions', {
+      quiz: quizIri, questionText, options,
+      correctAnswer: document.getElementById('qqAnswer').value,
+      points: parseInt(document.getElementById('qqPoints').value),
+      type: 'single',
+    });
+    toast('success', 'Question ajoutée');
+    document.getElementById('qqText').value = ''; document.getElementById('qqOptions').value = '';
+    loadQuizzes();
+  } catch(e) { toast('error', e.message); }
+}
+
+// ─── Enrollments ───
+async function loadEnrollments() {
+  try {
+    const d = await api('GET', '/api/enrollments');
+    const tbody = document.getElementById('enrollmentsTable');
+    const rows = (d.member || []).map(e => `
+      <tr>
+        <td>#${e.id}</td>
+        <td>${e.course?.title || '—'}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:70px;height:5px;background:#2d3748;border-radius:3px">
+              <div style="width:${e.progressPercent}%;height:100%;background:${e.progressPercent>=100?'#4ade80':'#8b5cf6'};border-radius:3px"></div>
+            </div>
+            <span style="font-size:11px">${e.progressPercent}%</span>
+          </div>
+        </td>
+        <td>${statusBadge(e.status)}</td>
+      </tr>
+    `).join('');
+    tbody.innerHTML = rows || '<tr class="empty-row"><td colspan="4">Aucune inscription</td></tr>';
+  } catch(e) {}
+}
+
+async function createEnrollment() {
+  const courseIri = document.getElementById('eCourse').value;
+  if(!courseIri) return toast('error', 'Sélectionnez un cours');
+  try {
+    const e = await api('POST', '/api/enrollments', { course: courseIri });
+    toast('success', `Inscription créée (#${e.id})`);
+    document.getElementById('completeId').value = e.id;
+    loadEnrollments();
+  } catch(e) { toast('error', e.message); }
+}
+
+async function completeEnrollment() {
+  const id = document.getElementById('completeId').value;
+  if(!id) return toast('error', 'Entrez un ID d\'inscription');
+  try {
+    const r = await api('POST', `/api/enrollments/${id}/complete`, {}, 'application/json');
+    toast('success', `✅ Terminé ! Certificat émis — UUID: ${r.uuid?.slice(0,8)}…`);
+    if(r.uuid) document.getElementById('verifyUuid').value = r.uuid;
+    loadEnrollments();
+    loadCertificates();
+  } catch(e) { toast('error', e.message); }
+}
+
+// ─── Certificates ───
+async function loadCertificates() {
+  try {
+    const certs = await api('GET', '/api/my-certificates', null, 'application/json');
+    const el = document.getElementById('certsList');
+    if(!certs?.length) { el.innerHTML = '<p class="text-muted">Aucun certificat — terminez un cours pour en obtenir un.</p>'; return; }
+    el.innerHTML = certs.map(c => `
+      <div class="cert-card">
+        <div style="display:flex;align-items:center;gap:8px">🏆 <span class="cert-title">${c.courseName || 'Certificat #'+c.id}</span></div>
+        <div class="cert-meta">UUID : <span class="tag">${c.uuid}</span></div>
+        <div class="cert-meta">Émis le ${new Date(c.issuedAt).toLocaleDateString('fr-FR')}</div>
+        <div class="cert-actions">
+          <a href="${API}/api/certificates/${c.id}/download" target="_blank" class="btn btn-primary btn-sm">⬇ Télécharger PDF</a>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('verifyUuid').value='${c.uuid}';showPage('certificates')">🔍 Vérifier</button>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) { document.getElementById('certsList').innerHTML = '<p class="text-muted">Erreur chargement</p>'; }
+}
+
+async function verifyCert() {
+  const uuid = document.getElementById('verifyUuid').value.trim();
+  if(!uuid) return toast('error', 'UUID requis');
+  const el = document.getElementById('verifyResult');
+  try {
+    const r = await fetch(`${API}/api/certificates/verify/${uuid}`, { headers:{'Accept':'application/json'} });
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.detail || 'Non trouvé');
+    el.innerHTML = `
+      <div class="verify-result">
+        <div style="color:#4ade80;font-weight:700;margin-bottom:8px">✅ Certificat authentique</div>
+        <div style="font-size:13px;display:flex;flex-direction:column;gap:6px">
+          <div>📚 Cours : <strong>${d.courseName || d.course}</strong></div>
+          <div>👤 Étudiant : <strong>${d.studentName || d.student}</strong></div>
+          <div>📅 Émis le : <strong>${new Date(d.issuedAt).toLocaleDateString('fr-FR')}</strong></div>
+          <div>🔑 UUID : <span class="tag">${uuid}</span></div>
+        </div>
+      </div>`;
+  } catch(e) {
+    el.innerHTML = `<div class="verify-result"><div style="color:#f87171;font-weight:700">❌ Certificat introuvable ou invalide</div></div>`;
+  }
+}
+
+// ─── Helpers ───
+async function loadCoursesSelect(selectId) {
+  try {
+    const d = await api('GET', '/api/courses');
+    const sel = document.getElementById(selectId);
+    sel.innerHTML = '<option value="">Sélectionner…</option>';
+    (d.member||[]).forEach(c => { sel.innerHTML += `<option value="${c['@id']}">${c.title}</option>`; });
+  } catch(e) {}
+}
+
+function levelBadge(level) {
+  const map = {beginner:'b-green',intermediate:'b-purple',advanced:'b-red'};
+  const labels = {beginner:'Débutant',intermediate:'Intermédiaire',advanced:'Avancé'};
+  return `<span class="badge ${map[level]||'b-gray'}">${labels[level]||level}</span>`;
+}
+
+function statusBadge(status) {
+  const map = {active:'b-blue',completed:'b-green',cancelled:'b-red'};
+  const labels = {active:'En cours',completed:'Terminé',cancelled:'Annulé'};
+  return `<span class="badge ${map[status]||'b-gray'}">${labels[status]||status}</span>`;
+}
+
+function toast(type, msg) {
+  const icons = {success:'✅',error:'❌',info:'ℹ️'};
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.remove(), 4500);
+}
+
+// ─── Init ───
+if(token && currentUser) { initApp(); } else {
+  document.getElementById('authPage').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+</script>
+</body>
+</html>
